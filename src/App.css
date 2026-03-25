@@ -45,14 +45,14 @@
 /* ── Map area ── */
 .app-main {
   flex: 1;
+  min-height: 0; /* required so flex child propagates height to its children */
   overflow: hidden;
   position: relative;
 }
 
 .map-wrapper {
-  position: relative;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  inset: 0; /* fills .app-main completely, no reliance on height: 100% */
 }
 
 .leaflet-map {

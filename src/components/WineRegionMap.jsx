@@ -72,6 +72,15 @@ function getName(props) {
   return props?.GI_NAME || props?.Name || props?.NAME || props?.name || ''
 }
 
+function InvalidateSize() {
+  const map = useMap()
+  useEffect(() => {
+    const t = setTimeout(() => map.invalidateSize(), 100)
+    return () => clearTimeout(t)
+  }, [map])
+  return null
+}
+
 function FitBounds({ datasets }) {
   const map = useMap()
   useEffect(() => {
@@ -190,6 +199,7 @@ export default function WineRegionMap() {
           ) : null
         )}
 
+        <InvalidateSize />
         <FitBounds datasets={datasets} />
       </MapContainer>
 
