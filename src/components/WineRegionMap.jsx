@@ -5,12 +5,19 @@ import 'leaflet/dist/leaflet.css'
 import RegionSidebar from './RegionSidebar'
 import LoadingOverlay from './LoadingOverlay'
 
+const ITEM_ID = '2dd4c385f0ed4d109c2e18ae99e819e2'
+const FS_BASE =
+  'https://services2.arcgis.com/bM4FHPEudBvjXRBC/arcgis/rest/services' +
+  '/Wine_Geographical_Indications_Australia/FeatureServer'
+
 // Layers ordered bottom → top. Pane z-indices enforce the rendering order.
+// Layer indices in the ArcGIS service: 0 = subregions, 1 = regions, 2 = zones
 const LAYER_CONFIG = [
   {
     id: 'zones',
     label: 'Zones',
     localPath: '/data/zones.geojson',
+    layerIdx: 2,
     pane: 'zonesPane',
     paneZ: 400,
     color: '#7B1535',
@@ -22,6 +29,7 @@ const LAYER_CONFIG = [
     id: 'regions',
     label: 'Regions',
     localPath: '/data/regions.geojson',
+    layerIdx: 1,
     pane: 'regionsPane',
     paneZ: 401,
     color: '#7B1535',
@@ -33,6 +41,7 @@ const LAYER_CONFIG = [
     id: 'subregions',
     label: 'Subregions',
     localPath: '/data/subregions.geojson',
+    layerIdx: 0,
     pane: 'subregionsPane',
     paneZ: 402,
     color: '#7B1535',
@@ -42,13 +51,20 @@ const LAYER_CONFIG = [
   },
 ]
 
-async function fetchLayer(localPath) {
-  try {
-    const res = await fetch(localPath)
-    if (!res.ok) return null
-    const data = await res.json()
-    if (data?.features?.length > 0) return data
-  } catch (_) {}
+async function fetchLayer(cfg) {
+  const urls = [
+    cfg.localPath,
+    `https://opendata.arcgis.com/datasets/${ITEM_ID}_${cfg.layerIdx}.geojson`,
+    `${FS_BASE}/${cfg.layerIdx}/query?where=1%3D1&outFields=*&f=geojson`,
+  ]
+  for (const url of urls) {
+    try {
+      const res = await fetch(url)
+      if (!res.ok) continue
+      const data = await res.json()
+      if (data?.features?.length > 0) return data
+    } catch (_) {}
+  }
   return null
 }
 
@@ -80,7 +96,7 @@ export default function WineRegionMap() {
   useEffect(() => {
     async function loadAll() {
       setLoading(true)
-      const results = await Promise.all(LAYER_CONFIG.map(cfg => fetchLayer(cfg.localPath)))
+      const results = await Promise.all(LAYER_CONFIG.map(cfg => fetchLayer(cfg)))
       const newData = {}
       const newErrors = {}
       LAYER_CONFIG.forEach((cfg, i) => {
