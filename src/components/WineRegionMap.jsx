@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useMemo } from 'react'
 import { MapContainer, TileLayer, GeoJSON, Pane, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -155,6 +155,7 @@ export default function WineRegionMap() {
   }
 
   const toggleVisible = (id) => setVisible(v => ({ ...v, [id]: !v[id] }))
+  const datasets = useMemo(() => Object.values(layerData), [layerData])
   const loadedLayers = LAYER_CONFIG.filter(c => layerData[c.id])
 
   return (
@@ -189,7 +190,7 @@ export default function WineRegionMap() {
           ) : null
         )}
 
-        <FitBounds datasets={Object.values(layerData)} />
+        <FitBounds datasets={datasets} />
       </MapContainer>
 
       <div className="layer-control">
