@@ -190,6 +190,57 @@
   word-break: break-word;
 }
 
+/* ── Layer control panel ── */
+.layer-control {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(30, 10, 18, 0.92);
+  border: 1px solid #6b2040;
+  border-radius: 8px;
+  padding: 12px 14px;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  min-width: 150px;
+}
+
+.layer-control h4 {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #a06070;
+  margin-bottom: 10px;
+}
+
+.layer-control-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #f0dde5;
+  cursor: pointer;
+  padding: 4px 0;
+  user-select: none;
+}
+
+.layer-control-item input[type="checkbox"] {
+  accent-color: #c9849a;
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.layer-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
 /* ── Data badge ── */
 .data-badge {
   position: absolute;
@@ -246,6 +297,28 @@
   color: #a06070;
   font-style: normal;
   font-size: 0.75rem;
+}
+
+/* ── Permanent polygon labels ── */
+.region-label.leaflet-tooltip {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #2d0a18 !important;
+  font-size: 0.68rem !important;
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+  pointer-events: none !important;
+  padding: 0 !important;
+  text-shadow:
+    1px 1px 3px rgba(255,255,255,0.9),
+    -1px -1px 3px rgba(255,255,255,0.9),
+    1px -1px 3px rgba(255,255,255,0.9),
+    -1px 1px 3px rgba(255,255,255,0.9) !important;
+}
+
+.region-label.leaflet-tooltip::before {
+  display: none !important;
 }
 
 /* ── Leaflet tooltip ── */

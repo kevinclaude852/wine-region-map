@@ -9,7 +9,7 @@ export default function App() {
           <span className="header-icon">🍷</span>
           <div>
             <h1>Australian Wine Regions</h1>
-            <p>Geographic Indication (GI) Sub-Regions — Wine Australia</p>
+            <p>Geographic Indications — Zones · Regions · Subregions</p>
           </div>
         </div>
       </header>
