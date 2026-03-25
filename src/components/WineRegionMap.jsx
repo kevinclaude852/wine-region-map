@@ -5,11 +5,6 @@ import 'leaflet/dist/leaflet.css'
 import RegionSidebar from './RegionSidebar'
 import LoadingOverlay from './LoadingOverlay'
 
-const AU_ITEM_ID = '2dd4c385f0ed4d109c2e18ae99e819e2'
-const AU_FS_BASE =
-  'https://services2.arcgis.com/bM4FHPEudBvjXRBC/arcgis/rest/services' +
-  '/Wine_Geographical_Indications_Australia/FeatureServer'
-
 // Layers within each country are ordered bottom → top (paneZ ascending).
 // Australia uses panes 400-402, USA uses 410-413.
 const COUNTRY_CONFIG = [
@@ -18,36 +13,9 @@ const COUNTRY_CONFIG = [
     label: 'Australia',
     color: '#7B1535',
     layers: [
-      {
-        id: 'au_zones', label: 'Zones',
-        localPath: '/data/au-zones.geojson',
-        apiFallbacks: [
-          `https://opendata.arcgis.com/datasets/${AU_ITEM_ID}_2.geojson`,
-          `${AU_FS_BASE}/2/query?where=1%3D1&outFields=*&f=geojson`,
-        ],
-        pane: 'auZonesPane', paneZ: 400,
-        fillOpacity: 0.12, borderOpacity: 0.45, weight: 1.5,
-      },
-      {
-        id: 'au_regions', label: 'Regions',
-        localPath: '/data/au-regions.geojson',
-        apiFallbacks: [
-          `https://opendata.arcgis.com/datasets/${AU_ITEM_ID}_1.geojson`,
-          `${AU_FS_BASE}/1/query?where=1%3D1&outFields=*&f=geojson`,
-        ],
-        pane: 'auRegionsPane', paneZ: 401,
-        fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5,
-      },
-      {
-        id: 'au_subregions', label: 'Subregions',
-        localPath: '/data/au-subregions.geojson',
-        apiFallbacks: [
-          `https://opendata.arcgis.com/datasets/${AU_ITEM_ID}_0.geojson`,
-          `${AU_FS_BASE}/0/query?where=1%3D1&outFields=*&f=geojson`,
-        ],
-        pane: 'auSubregionsPane', paneZ: 402,
-        fillOpacity: 0.55, borderOpacity: 0.90, weight: 1.5,
-      },
+      { id: 'au_zones',      label: 'Zones',      localPath: '/data/au-zones.geojson',      pane: 'auZonesPane',      paneZ: 400, fillOpacity: 0.12, borderOpacity: 0.45, weight: 1.5 },
+      { id: 'au_regions',    label: 'Regions',    localPath: '/data/au-regions.geojson',    pane: 'auRegionsPane',    paneZ: 401, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
+      { id: 'au_subregions', label: 'Subregions', localPath: '/data/au-subregions.geojson', pane: 'auSubregionsPane', paneZ: 402, fillOpacity: 0.55, borderOpacity: 0.90, weight: 1.5 },
     ],
   },
   {
@@ -55,34 +23,10 @@ const COUNTRY_CONFIG = [
     label: 'USA',
     color: '#1B4F8A',
     layers: [
-      {
-        id: 'us_regional', label: 'Regional',
-        localPath: '/data/us-regional.geojson',
-        apiFallbacks: [],
-        pane: 'usRegionalPane', paneZ: 410,
-        fillOpacity: 0.10, borderOpacity: 0.40, weight: 1.5,
-      },
-      {
-        id: 'us_county', label: 'County',
-        localPath: '/data/us-county.geojson',
-        apiFallbacks: [],
-        pane: 'usCountyPane', paneZ: 411,
-        fillOpacity: 0.20, borderOpacity: 0.55, weight: 1.5,
-      },
-      {
-        id: 'us_ava', label: 'AVA',
-        localPath: '/data/us-ava.geojson',
-        apiFallbacks: [],
-        pane: 'usAvaPane', paneZ: 412,
-        fillOpacity: 0.35, borderOpacity: 0.70, weight: 1.5,
-      },
-      {
-        id: 'us_subava', label: 'Sub-AVA',
-        localPath: '/data/us-subava.geojson',
-        apiFallbacks: [],
-        pane: 'usSubAvaPane', paneZ: 413,
-        fillOpacity: 0.55, borderOpacity: 0.90, weight: 1.5,
-      },
+      { id: 'us_regional', label: 'Regional', localPath: '/data/us-regional.geojson', pane: 'usRegionalPane', paneZ: 410, fillOpacity: 0.10, borderOpacity: 0.40, weight: 1.5 },
+      { id: 'us_county',   label: 'County',   localPath: '/data/us-county.geojson',   pane: 'usCountyPane',   paneZ: 411, fillOpacity: 0.20, borderOpacity: 0.55, weight: 1.5 },
+      { id: 'us_ava',      label: 'AVA',      localPath: '/data/us-ava.geojson',      pane: 'usAvaPane',      paneZ: 412, fillOpacity: 0.35, borderOpacity: 0.70, weight: 1.5 },
+      { id: 'us_subava',   label: 'Sub-AVA',  localPath: '/data/us-subava.geojson',   pane: 'usSubAvaPane',   paneZ: 413, fillOpacity: 0.55, borderOpacity: 0.90, weight: 1.5 },
     ],
   },
 ]
@@ -92,17 +36,15 @@ const ALL_LAYERS = COUNTRY_CONFIG.flatMap(c =>
   c.layers.map(l => ({ ...l, color: c.color, countryLabel: c.label }))
 )
 
-async function fetchLayer(layer) {
-  const urls = [layer.localPath, ...(layer.apiFallbacks || [])]
-  for (const url of urls) {
-    try {
-      const res = await fetch(url)
-      if (!res.ok) continue
-      const data = await res.json()
-      if (data?.features?.length > 0) return data
-    } catch (_) {}
+async function fetchLayer(localPath) {
+  try {
+    const res = await fetch(localPath)
+    if (!res.ok) return null
+    const data = await res.json()
+    return data?.features?.length > 0 ? data : null
+  } catch (_) {
+    return null
   }
-  return null
 }
 
 function getName(props) {
@@ -146,14 +88,13 @@ export default function WineRegionMap() {
   useEffect(() => {
     async function loadAll() {
       setLoading(true)
-      const results = await Promise.all(ALL_LAYERS.map(l => fetchLayer(l)))
+      const results = await Promise.all(ALL_LAYERS.map(l => fetchLayer(l.localPath)))
       const newData = {}
       const newErrors = {}
       ALL_LAYERS.forEach((layer, i) => {
         newData[layer.id] = results[i]
-        // Only surface an error for layers with API fallbacks (expected to always load)
-        if (!results[i] && layer.apiFallbacks.length > 0) {
-          newErrors[layer.id] = `Could not load ${layer.countryLabel} ${layer.label}`
+        if (!results[i]) {
+          newErrors[layer.id] = `Missing ${layer.countryLabel} ${layer.label}`
         }
       })
       setLayerData(newData)
