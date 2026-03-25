@@ -5,12 +5,12 @@
 }
 
 html {
-  height: -webkit-fill-available; /* iOS Safari fallback */
+  height: 100%;
 }
 
 body {
-  min-height: 100vh;
-  min-height: -webkit-fill-available;
+  height: 100%;
+  height: -webkit-fill-available; /* iOS Safari: sets body to visible viewport */
   font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
   background: #1a0a0f;
   color: #f5ece8;

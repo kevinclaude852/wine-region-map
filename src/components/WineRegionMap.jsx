@@ -75,7 +75,7 @@ function getName(props) {
 function InvalidateSize() {
   const map = useMap()
   useEffect(() => {
-    const t = setTimeout(() => map.invalidateSize(), 100)
+    const t = setTimeout(() => map.invalidateSize(), 300)
     return () => clearTimeout(t)
   }, [map])
   return null

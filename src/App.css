@@ -2,8 +2,9 @@
 .app {
   display: flex;
   flex-direction: column;
-  height: 100vh;       /* fallback for older browsers */
-  height: 100dvh;      /* adjusts for mobile browser chrome (address bar) */
+  height: 100vh;                   /* baseline fallback */
+  height: -webkit-fill-available;  /* iOS Safari: actual visible viewport */
+  height: 100dvh;                  /* modern browsers: adjusts for chrome */
   overflow: hidden;
 }
 
