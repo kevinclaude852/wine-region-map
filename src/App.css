@@ -207,12 +207,18 @@
   min-width: 150px;
 }
 
-.layer-control h4 {
+.layer-group-title {
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: #a06070;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+}
+
+.layer-group--separated {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(107, 32, 64, 0.4);
 }
 
 .layer-control-item {

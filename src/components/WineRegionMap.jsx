@@ -5,58 +5,95 @@ import 'leaflet/dist/leaflet.css'
 import RegionSidebar from './RegionSidebar'
 import LoadingOverlay from './LoadingOverlay'
 
-const ITEM_ID = '2dd4c385f0ed4d109c2e18ae99e819e2'
-const FS_BASE =
+const AU_ITEM_ID = '2dd4c385f0ed4d109c2e18ae99e819e2'
+const AU_FS_BASE =
   'https://services2.arcgis.com/bM4FHPEudBvjXRBC/arcgis/rest/services' +
   '/Wine_Geographical_Indications_Australia/FeatureServer'
 
-// Layers ordered bottom → top. Pane z-indices enforce the rendering order.
-// Layer indices in the ArcGIS service: 0 = subregions, 1 = regions, 2 = zones
-const LAYER_CONFIG = [
+// Layers within each country are ordered bottom → top (paneZ ascending).
+// Australia uses panes 400-402, USA uses 410-413.
+const COUNTRY_CONFIG = [
   {
-    id: 'zones',
-    label: 'Zones',
-    localPath: '/data/zones.geojson',
-    layerIdx: 2,
-    pane: 'zonesPane',
-    paneZ: 400,
+    id: 'australia',
+    label: 'Australia',
     color: '#7B1535',
-    fillOpacity: 0.12,
-    borderOpacity: 0.45,
-    weight: 1.5,
+    layers: [
+      {
+        id: 'au_zones', label: 'Zones',
+        localPath: '/data/au-zones.geojson',
+        apiFallbacks: [
+          `https://opendata.arcgis.com/datasets/${AU_ITEM_ID}_2.geojson`,
+          `${AU_FS_BASE}/2/query?where=1%3D1&outFields=*&f=geojson`,
+        ],
+        pane: 'auZonesPane', paneZ: 400,
+        fillOpacity: 0.12, borderOpacity: 0.45, weight: 1.5,
+      },
+      {
+        id: 'au_regions', label: 'Regions',
+        localPath: '/data/au-regions.geojson',
+        apiFallbacks: [
+          `https://opendata.arcgis.com/datasets/${AU_ITEM_ID}_1.geojson`,
+          `${AU_FS_BASE}/1/query?where=1%3D1&outFields=*&f=geojson`,
+        ],
+        pane: 'auRegionsPane', paneZ: 401,
+        fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5,
+      },
+      {
+        id: 'au_subregions', label: 'Subregions',
+        localPath: '/data/au-subregions.geojson',
+        apiFallbacks: [
+          `https://opendata.arcgis.com/datasets/${AU_ITEM_ID}_0.geojson`,
+          `${AU_FS_BASE}/0/query?where=1%3D1&outFields=*&f=geojson`,
+        ],
+        pane: 'auSubregionsPane', paneZ: 402,
+        fillOpacity: 0.55, borderOpacity: 0.90, weight: 1.5,
+      },
+    ],
   },
   {
-    id: 'regions',
-    label: 'Regions',
-    localPath: '/data/regions.geojson',
-    layerIdx: 1,
-    pane: 'regionsPane',
-    paneZ: 401,
-    color: '#7B1535',
-    fillOpacity: 0.30,
-    borderOpacity: 0.65,
-    weight: 1.5,
-  },
-  {
-    id: 'subregions',
-    label: 'Subregions',
-    localPath: '/data/subregions.geojson',
-    layerIdx: 0,
-    pane: 'subregionsPane',
-    paneZ: 402,
-    color: '#7B1535',
-    fillOpacity: 0.55,
-    borderOpacity: 0.90,
-    weight: 1.5,
+    id: 'usa',
+    label: 'USA',
+    color: '#1B4F8A',
+    layers: [
+      {
+        id: 'us_regional', label: 'Regional',
+        localPath: '/data/us-regional.geojson',
+        apiFallbacks: [],
+        pane: 'usRegionalPane', paneZ: 410,
+        fillOpacity: 0.10, borderOpacity: 0.40, weight: 1.5,
+      },
+      {
+        id: 'us_county', label: 'County',
+        localPath: '/data/us-county.geojson',
+        apiFallbacks: [],
+        pane: 'usCountyPane', paneZ: 411,
+        fillOpacity: 0.20, borderOpacity: 0.55, weight: 1.5,
+      },
+      {
+        id: 'us_ava', label: 'AVA',
+        localPath: '/data/us-ava.geojson',
+        apiFallbacks: [],
+        pane: 'usAvaPane', paneZ: 412,
+        fillOpacity: 0.35, borderOpacity: 0.70, weight: 1.5,
+      },
+      {
+        id: 'us_subava', label: 'Sub-AVA',
+        localPath: '/data/us-subava.geojson',
+        apiFallbacks: [],
+        pane: 'usSubAvaPane', paneZ: 413,
+        fillOpacity: 0.55, borderOpacity: 0.90, weight: 1.5,
+      },
+    ],
   },
 ]
 
-async function fetchLayer(cfg) {
-  const urls = [
-    cfg.localPath,
-    `https://opendata.arcgis.com/datasets/${ITEM_ID}_${cfg.layerIdx}.geojson`,
-    `${FS_BASE}/${cfg.layerIdx}/query?where=1%3D1&outFields=*&f=geojson`,
-  ]
+// Flat list with color and countryLabel merged in for easy iteration
+const ALL_LAYERS = COUNTRY_CONFIG.flatMap(c =>
+  c.layers.map(l => ({ ...l, color: c.color, countryLabel: c.label }))
+)
+
+async function fetchLayer(layer) {
+  const urls = [layer.localPath, ...(layer.apiFallbacks || [])]
   for (const url of urls) {
     try {
       const res = await fetch(url)
@@ -69,7 +106,7 @@ async function fetchLayer(cfg) {
 }
 
 function getName(props) {
-  return props?.GI_NAME || props?.Name || props?.NAME || props?.name || ''
+  return props?.GI_NAME || props?.name || props?.Name || props?.NAME || ''
 }
 
 function InvalidateSize() {
@@ -95,22 +132,29 @@ function FitBounds({ datasets }) {
 }
 
 export default function WineRegionMap() {
-  const [layerData, setLayerData] = useState({ zones: null, regions: null, subregions: null })
+  const [layerData, setLayerData] = useState(
+    () => Object.fromEntries(ALL_LAYERS.map(l => [l.id, null]))
+  )
   const [loading, setLoading] = useState(true)
   const [errors, setErrors] = useState({})
-  const [visible, setVisible] = useState({ zones: true, regions: true, subregions: true })
+  const [visible, setVisible] = useState(
+    () => Object.fromEntries(ALL_LAYERS.map(l => [l.id, true]))
+  )
   const [selectedRegion, setSelectedRegion] = useState(null)
   const geojsonRefs = useRef({})
 
   useEffect(() => {
     async function loadAll() {
       setLoading(true)
-      const results = await Promise.all(LAYER_CONFIG.map(cfg => fetchLayer(cfg)))
+      const results = await Promise.all(ALL_LAYERS.map(l => fetchLayer(l)))
       const newData = {}
       const newErrors = {}
-      LAYER_CONFIG.forEach((cfg, i) => {
-        newData[cfg.id] = results[i]
-        if (!results[i]) newErrors[cfg.id] = `Could not load ${cfg.label}`
+      ALL_LAYERS.forEach((layer, i) => {
+        newData[layer.id] = results[i]
+        // Only surface an error for layers with API fallbacks (expected to always load)
+        if (!results[i] && layer.apiFallbacks.length > 0) {
+          newErrors[layer.id] = `Could not load ${layer.countryLabel} ${layer.label}`
+        }
       })
       setLayerData(newData)
       setErrors(newErrors)
@@ -119,33 +163,33 @@ export default function WineRegionMap() {
     loadAll()
   }, [])
 
-  function makeStyle(cfg) {
+  function makeStyle(layer) {
     return () => ({
-      fillColor: cfg.color,
-      fillOpacity: cfg.fillOpacity,
-      color: cfg.color,
-      weight: cfg.weight,
-      opacity: cfg.borderOpacity,
+      fillColor: layer.color,
+      fillOpacity: layer.fillOpacity,
+      color: layer.color,
+      weight: layer.weight,
+      opacity: layer.borderOpacity,
     })
   }
 
-  function makeOnEachFeature(cfg) {
-    return (feature, layer) => {
+  function makeOnEachFeature(layer) {
+    return (feature, leafletLayer) => {
       const props = feature.properties || {}
       const name = getName(props)
 
       if (name) {
-        layer.bindTooltip(name, {
+        leafletLayer.bindTooltip(name, {
           permanent: true,
           direction: 'center',
           className: 'region-label',
         })
       }
 
-      layer.on({
+      leafletLayer.on({
         mouseover(e) {
           e.target.setStyle({
-            fillOpacity: Math.min(cfg.fillOpacity + 0.2, 0.8),
+            fillOpacity: Math.min(layer.fillOpacity + 0.2, 0.8),
             color: '#fff',
             weight: 2.5,
             opacity: 1,
@@ -153,19 +197,25 @@ export default function WineRegionMap() {
           e.target.bringToFront()
         },
         mouseout(e) {
-          const ref = geojsonRefs.current[cfg.id]
+          const ref = geojsonRefs.current[layer.id]
           if (ref) ref.resetStyle(e.target)
         },
         click() {
-          setSelectedRegion({ ...props, _layerType: cfg.label })
+          setSelectedRegion({ ...props, _layerType: layer.label, _country: layer.countryLabel })
         },
       })
     }
   }
 
   const toggleVisible = (id) => setVisible(v => ({ ...v, [id]: !v[id] }))
-  const datasets = useMemo(() => Object.values(layerData), [layerData])
-  const loadedLayers = LAYER_CONFIG.filter(c => layerData[c.id])
+
+  // Fit bounds to Australia only; USA is on a separate continent
+  const auDatasets = useMemo(
+    () => COUNTRY_CONFIG.find(c => c.id === 'australia').layers.map(l => layerData[l.id]),
+    [layerData]
+  )
+
+  const errorMessages = Object.values(errors)
 
   return (
     <div className="map-wrapper">
@@ -181,64 +231,69 @@ export default function WineRegionMap() {
           maxZoom={19}
         />
 
-        {/* Declare panes — zones (400) sits below regions (401) below subregions (402) */}
-        {LAYER_CONFIG.map(cfg => (
-          <Pane key={cfg.pane} name={cfg.pane} style={{ zIndex: cfg.paneZ }} />
+        {ALL_LAYERS.map(layer => (
+          <Pane key={layer.pane} name={layer.pane} style={{ zIndex: layer.paneZ }} />
         ))}
 
-        {LAYER_CONFIG.map(cfg =>
-          visible[cfg.id] && layerData[cfg.id] ? (
+        {ALL_LAYERS.map(layer =>
+          visible[layer.id] && layerData[layer.id] ? (
             <GeoJSON
-              key={cfg.id}
-              data={layerData[cfg.id]}
-              style={makeStyle(cfg)}
-              onEachFeature={makeOnEachFeature(cfg)}
-              ref={el => { geojsonRefs.current[cfg.id] = el }}
-              pane={cfg.pane}
+              key={layer.id}
+              data={layerData[layer.id]}
+              style={makeStyle(layer)}
+              onEachFeature={makeOnEachFeature(layer)}
+              ref={el => { geojsonRefs.current[layer.id] = el }}
+              pane={layer.pane}
             />
           ) : null
         )}
 
         <InvalidateSize />
-        <FitBounds datasets={datasets} />
+        <FitBounds datasets={auDatasets} />
       </MapContainer>
 
       <div className="layer-control">
-        <h4>Layers</h4>
-        {LAYER_CONFIG.map(cfg => (
-          <label key={cfg.id} className="layer-control-item">
-            <input
-              type="checkbox"
-              checked={visible[cfg.id]}
-              onChange={() => toggleVisible(cfg.id)}
-            />
-            <span
-              className="layer-swatch"
-              style={{
-                background: cfg.color,
-                opacity: cfg.fillOpacity * 1.8 + 0.2,
-              }}
-            />
-            {cfg.label}
-          </label>
+        {COUNTRY_CONFIG.map((country, i) => (
+          <div key={country.id} className={`layer-group${i > 0 ? ' layer-group--separated' : ''}`}>
+            <h4 className="layer-group-title">{country.label}</h4>
+            {country.layers.map(layer => (
+              <label key={layer.id} className="layer-control-item">
+                <input
+                  type="checkbox"
+                  checked={visible[layer.id]}
+                  onChange={() => toggleVisible(layer.id)}
+                />
+                <span
+                  className="layer-swatch"
+                  style={{
+                    background: country.color,
+                    opacity: layer.fillOpacity * 1.8 + 0.2,
+                  }}
+                />
+                {layer.label}
+              </label>
+            ))}
+          </div>
         ))}
       </div>
 
       {loading && <LoadingOverlay />}
 
-      {Object.keys(errors).length > 0 && !loading && (
-        <div className="error-banner">{Object.values(errors).join(' · ')}</div>
+      {errorMessages.length > 0 && !loading && (
+        <div className="error-banner">{errorMessages.join(' · ')}</div>
       )}
 
       {selectedRegion && (
         <RegionSidebar region={selectedRegion} onClose={() => setSelectedRegion(null)} />
       )}
 
-      {!loading && loadedLayers.length > 0 && (
+      {!loading && (
         <div className="data-badge">
-          {loadedLayers
-            .map(c => `${layerData[c.id].features.length} ${c.label.toLowerCase()}`)
-            .join(' · ')}
+          {COUNTRY_CONFIG.flatMap(country =>
+            country.layers
+              .filter(l => layerData[l.id])
+              .map(l => `${layerData[l.id].features.length} ${l.label.toLowerCase()}`)
+          ).join(' · ')}
         </div>
       )}
     </div>
