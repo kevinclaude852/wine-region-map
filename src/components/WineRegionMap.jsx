@@ -29,9 +29,8 @@ const COUNTRY_CONFIG = [
     color: '#1B4F8A',
     layers: [
       { id: 'us_regional', label: 'Regional', localPath: '/data/us-regional.geojson', pane: 'usRegionalPane', paneZ: 410, fillOpacity: 0.10, borderOpacity: 0.40, weight: 1.5 },
-      { id: 'us_county',   label: 'County',   localPath: '/data/us-county.geojson',   pane: 'usCountyPane',   paneZ: 411, fillOpacity: 0.20, borderOpacity: 0.55, weight: 1.5 },
-      { id: 'us_ava',      label: 'AVA',      localPath: '/data/us-ava.geojson',      pane: 'usAvaPane',      paneZ: 412, fillOpacity: 0.35, borderOpacity: 0.70, weight: 1.5 },
-      { id: 'us_subava',   label: 'Sub-AVA',  localPath: '/data/us-subava.geojson',   pane: 'usSubAvaPane',   paneZ: 413, fillOpacity: 0.55, borderOpacity: 0.90, weight: 1.5 },
+      { id: 'us_ava',      label: 'AVA',      localPath: '/data/us-ava.geojson',      pane: 'usAvaPane',      paneZ: 411, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
+      { id: 'us_subava',   label: 'Sub-AVA',  localPath: '/data/us-subava.geojson',   pane: 'usSubAvaPane',   paneZ: 412, fillOpacity: 0.55, borderOpacity: 0.90, weight: 1.5 },
     ],
   },
 ]
@@ -100,8 +99,9 @@ export default function WineRegionMap() {
       const newErrors = {}
       ALL_LAYERS.forEach((layer, i) => {
         newData[layer.id] = results[i]
-        if (!results[i]) {
-          newErrors[layer.id] = `Missing ${layer.countryLabel} ${layer.label}`
+        // Only surface errors for layers that have API fallbacks (i.e. Australia)
+        if (!results[i] && layer.fallbackUrls?.length) {
+          newErrors[layer.id] = `Could not load ${layer.countryLabel} ${layer.label}`
         }
       })
       setLayerData(newData)
