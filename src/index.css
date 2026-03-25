@@ -4,9 +4,18 @@
   padding: 0;
 }
 
-html, body, #root {
-  height: 100%;
+html {
+  height: -webkit-fill-available; /* iOS Safari fallback */
+}
+
+body {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
   font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
   background: #1a0a0f;
   color: #f5ece8;
+}
+
+#root {
+  height: 100%;
 }
