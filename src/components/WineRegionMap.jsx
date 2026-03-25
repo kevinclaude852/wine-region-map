@@ -1,21 +1,18 @@
 import { useEffect, useState, useRef } from 'react'
-import { MapContainer, TileLayer, GeoJSON, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, GeoJSON, Pane, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import RegionSidebar from './RegionSidebar'
 import LoadingOverlay from './LoadingOverlay'
 
-const ITEM_ID = '2dd4c385f0ed4d109c2e18ae99e819e2'
-const FS_BASE =
-  'https://services2.arcgis.com/bM4FHPEudBvjXRBC/arcgis/rest/services' +
-  '/Wine_Geographical_Indications_Australia/FeatureServer'
-
-// Three layers ordered bottom → top; opacity increases with specificity
+// Layers ordered bottom → top. Pane z-indices enforce the rendering order.
 const LAYER_CONFIG = [
   {
     id: 'zones',
     label: 'Zones',
-    layerIdx: 0,
+    localPath: '/data/zones.geojson',
+    pane: 'zonesPane',
+    paneZ: 400,
     color: '#7B1535',
     fillOpacity: 0.12,
     borderOpacity: 0.45,
@@ -24,7 +21,9 @@ const LAYER_CONFIG = [
   {
     id: 'regions',
     label: 'Regions',
-    layerIdx: 1,
+    localPath: '/data/regions.geojson',
+    pane: 'regionsPane',
+    paneZ: 401,
     color: '#7B1535',
     fillOpacity: 0.30,
     borderOpacity: 0.65,
@@ -33,7 +32,9 @@ const LAYER_CONFIG = [
   {
     id: 'subregions',
     label: 'Subregions',
-    layerIdx: 2,
+    localPath: '/data/subregions.geojson',
+    pane: 'subregionsPane',
+    paneZ: 402,
     color: '#7B1535',
     fillOpacity: 0.55,
     borderOpacity: 0.90,
@@ -41,19 +42,13 @@ const LAYER_CONFIG = [
   },
 ]
 
-async function fetchLayer(layerIdx) {
-  const urls = [
-    `https://opendata.arcgis.com/datasets/${ITEM_ID}_${layerIdx}.geojson`,
-    `${FS_BASE}/${layerIdx}/query?where=1%3D1&outFields=*&f=geojson`,
-  ]
-  for (const url of urls) {
-    try {
-      const res = await fetch(url)
-      if (!res.ok) continue
-      const data = await res.json()
-      if (data?.features?.length > 0) return data
-    } catch (_) {}
-  }
+async function fetchLayer(localPath) {
+  try {
+    const res = await fetch(localPath)
+    if (!res.ok) return null
+    const data = await res.json()
+    if (data?.features?.length > 0) return data
+  } catch (_) {}
   return null
 }
 
@@ -85,7 +80,7 @@ export default function WineRegionMap() {
   useEffect(() => {
     async function loadAll() {
       setLoading(true)
-      const results = await Promise.all(LAYER_CONFIG.map(cfg => fetchLayer(cfg.layerIdx)))
+      const results = await Promise.all(LAYER_CONFIG.map(cfg => fetchLayer(cfg.localPath)))
       const newData = {}
       const newErrors = {}
       LAYER_CONFIG.forEach((cfg, i) => {
@@ -160,6 +155,11 @@ export default function WineRegionMap() {
           maxZoom={19}
         />
 
+        {/* Declare panes — zones (400) sits below regions (401) below subregions (402) */}
+        {LAYER_CONFIG.map(cfg => (
+          <Pane key={cfg.pane} name={cfg.pane} style={{ zIndex: cfg.paneZ }} />
+        ))}
+
         {LAYER_CONFIG.map(cfg =>
           visible[cfg.id] && layerData[cfg.id] ? (
             <GeoJSON
@@ -168,6 +168,7 @@ export default function WineRegionMap() {
               style={makeStyle(cfg)}
               onEachFeature={makeOnEachFeature(cfg)}
               ref={el => { geojsonRefs.current[cfg.id] = el }}
+              pane={cfg.pane}
             />
           ) : null
         )}
