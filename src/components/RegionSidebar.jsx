@@ -7,7 +7,7 @@ export default function RegionSidebar({ region, onClose }) {
   )
 
   const name =
-    region.GI_NAME || region.PDOnam || region.Name || region.NAME || region.name || 'Wine Region'
+    region.GI_NAME || region.PDOnam || region.nombre || region.Name || region.NAME || region.name || 'Wine Region'
 
   return (
     <div className="region-sidebar">

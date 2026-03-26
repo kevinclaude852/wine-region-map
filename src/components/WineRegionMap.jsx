@@ -61,6 +61,14 @@ const COUNTRY_CONFIG = [
       { id: 'eu_SK', label: 'Slovakia',       localPath: '/data/eu-regions/EU_PDO_SK.geojson', pane: 'euPane', paneZ: 420, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
     ],
   },
+  {
+    id: 'argentina',
+    label: 'Argentina',
+    color: '#8B4513',
+    layers: [
+      { id: 'ar_regions', label: 'Regions', localPath: '/data/argentina_regions.geojson', shiftLng: true, pane: 'arPane', paneZ: 430, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
+    ],
+  },
 ]
 
 // Flat list with color and countryLabel merged in for easy iteration
@@ -82,7 +90,7 @@ async function fetchLayer(layer) {
 }
 
 function getName(props) {
-  return props?.GI_NAME || props?.PDOnam || props?.name || props?.Name || props?.NAME || ''
+  return props?.GI_NAME || props?.PDOnam || props?.nombre || props?.name || props?.Name || props?.NAME || ''
 }
 
 function InvalidateSize() {
