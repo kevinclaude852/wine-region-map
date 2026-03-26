@@ -156,9 +156,9 @@ export default function WineRegionMap() {
 
       if (name) {
         leafletLayer.bindTooltip(name, {
-          permanent: true,
           direction: 'center',
           className: 'region-label',
+          sticky: true,
         })
       }
 
