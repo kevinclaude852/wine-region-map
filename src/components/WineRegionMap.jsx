@@ -11,7 +11,7 @@ const AU_FS_BASE =
   '/Wine_Geographical_Indications_Australia/FeatureServer'
 
 // Layers within each country are ordered bottom → top (paneZ ascending).
-// Australia uses panes 400-402, USA uses 410-413.
+// Australia uses panes 400-402, USA uses 410-412, EU uses 420.
 const COUNTRY_CONFIG = [
   {
     id: 'australia',
@@ -31,6 +31,14 @@ const COUNTRY_CONFIG = [
       { id: 'us_regional', label: 'Regional', localPath: '/data/us-regional.geojson', pane: 'usRegionalPane', paneZ: 410, fillOpacity: 0.10, borderOpacity: 0.40, weight: 1.5 },
       { id: 'us_ava',      label: 'AVA',      localPath: '/data/us-ava.geojson',      pane: 'usAvaPane',      paneZ: 411, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
       { id: 'us_subava',   label: 'Sub-AVA',  localPath: '/data/us-subava.geojson',   pane: 'usSubAvaPane',   paneZ: 412, fillOpacity: 0.55, borderOpacity: 0.90, weight: 1.5 },
+    ],
+  },
+  {
+    id: 'eu',
+    label: 'EU',
+    color: '#2E7D32',
+    layers: [
+      { id: 'eu_regions', label: 'Regions', localPath: '/data/eu-regions.geojson', pane: 'euRegionsPane', paneZ: 420, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
     ],
   },
 ]

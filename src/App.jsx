@@ -6,9 +6,8 @@ export default function App() {
     <div className="app">
       <header className="app-header">
         <div className="header-inner">
-          <span className="header-icon">🍷</span>
           <div>
-            <h1>Australian Wine Regions</h1>
+            <h1>Wine Regions</h1>
             <p>Geographic Indications — Zones · Regions · Subregions</p>
           </div>
         </div>
