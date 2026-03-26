@@ -28,9 +28,9 @@ const COUNTRY_CONFIG = [
     label: 'USA',
     color: '#1B4F8A',
     layers: [
-      { id: 'us_regional', label: 'Regional', localPath: '/data/us-regional.geojson', pane: 'usRegionalPane', paneZ: 410, fillOpacity: 0.10, borderOpacity: 0.40, weight: 1.5 },
-      { id: 'us_ava',      label: 'AVA',      localPath: '/data/us-ava.geojson',      pane: 'usAvaPane',      paneZ: 411, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
-      { id: 'us_subava',   label: 'Sub-AVA',  localPath: '/data/us-subava.geojson',   pane: 'usSubAvaPane',   paneZ: 412, fillOpacity: 0.55, borderOpacity: 0.90, weight: 1.5 },
+      { id: 'us_regional', label: 'Regional', localPath: '/data/us-regional.geojson', shiftLng: true, pane: 'usRegionalPane', paneZ: 410, fillOpacity: 0.10, borderOpacity: 0.40, weight: 1.5 },
+      { id: 'us_ava',      label: 'AVA',      localPath: '/data/us-ava.geojson',      shiftLng: true, pane: 'usAvaPane',      paneZ: 411, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
+      { id: 'us_subava',   label: 'Sub-AVA',  localPath: '/data/us-subava.geojson',   shiftLng: true, pane: 'usSubAvaPane',   paneZ: 412, fillOpacity: 0.55, borderOpacity: 0.90, weight: 1.5 },
     ],
   },
   {
@@ -239,7 +239,7 @@ export default function WineRegionMap() {
         center={[20, 160]}
         zoom={2}
         minZoom={2}
-        maxBounds={[[-85, -10], [85, 350]]}
+        maxBounds={[[-85, -40], [85, 320]]}
         maxBoundsViscosity={1.0}
         worldCopyJump={false}
         className="leaflet-map"
@@ -265,6 +265,9 @@ export default function WineRegionMap() {
               onEachFeature={makeOnEachFeature(layer)}
               ref={el => { geojsonRefs.current[layer.id] = el }}
               pane={layer.pane}
+              coordsToLatLng={layer.shiftLng
+                ? (coords) => L.latLng(coords[1], coords[0] < 0 ? coords[0] + 360 : coords[0])
+                : undefined}
             />
           ) : null
         )}
