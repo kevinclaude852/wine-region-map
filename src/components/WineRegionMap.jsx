@@ -236,8 +236,12 @@ export default function WineRegionMap() {
   return (
     <div className="map-wrapper">
       <MapContainer
-        center={[-33.5, 135]}
-        zoom={5}
+        center={[20, 160]}
+        zoom={2}
+        minZoom={2}
+        maxBounds={[[-85, -10], [85, 350]]}
+        maxBoundsViscosity={1.0}
+        worldCopyJump={false}
         className="leaflet-map"
         zoomControl={true}
       >
@@ -245,6 +249,7 @@ export default function WineRegionMap() {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           maxZoom={19}
+          noWrap={false}
         />
 
         {[...new Map(ALL_LAYERS.map(l => [l.pane, l])).values()].map(layer => (
