@@ -239,7 +239,7 @@ export default function WineRegionMap() {
         center={[20, 160]}
         zoom={2}
         minZoom={2}
-        maxBounds={[[-85, -40], [85, 320]]}
+        maxBounds={[[-85, -30], [85, 330]]}
         maxBoundsViscosity={1.0}
         worldCopyJump={false}
         className="leaflet-map"
