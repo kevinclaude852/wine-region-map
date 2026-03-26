@@ -217,14 +217,19 @@
   justify-content: space-between;
   gap: 12px;
   width: 100%;
-  background: none;
+  background: rgba(30, 10, 18, 0.98);
   border: none;
+  border-bottom: 1px solid rgba(107, 32, 64, 0.4);
   color: #f0dde5;
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
-  padding: 0;
+  padding: 0 0 8px;
+  margin-bottom: 4px;
   text-align: left;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 .toggle-icon {
