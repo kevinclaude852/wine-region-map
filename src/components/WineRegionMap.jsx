@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useMemo } from 'react'
+import { useEffect, useState, useRef, useMemo, useCallback } from 'react'
 import { MapContainer, TileLayer, GeoJSON, Pane, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -94,6 +94,47 @@ function InvalidateSize() {
   return null
 }
 
+// Show permanent tooltip only when the polygon is large enough on screen.
+// Threshold: bounding box pixel area > 1200 (e.g. 60x20px).
+// Fires on zoomend, moveend, and whenever visible layers change.
+function ZoomBasedLabels({ geojsonRefs, visible }) {
+  const map = useMap()
+  const timerRef = useRef(null)
+
+  const updateLabels = useCallback(() => {
+    Object.values(geojsonRefs.current).forEach(ref => {
+      if (!ref) return
+      ref.eachLayer(featureLayer => {
+        const tooltip = featureLayer.getTooltip()
+        if (!tooltip) return
+        try {
+          const bounds = featureLayer.getBounds()
+          if (!bounds.isValid()) return
+          const sw = map.latLngToContainerPoint(bounds.getSouthWest())
+          const ne = map.latLngToContainerPoint(bounds.getNorthEast())
+          const w = Math.abs(ne.x - sw.x)
+          const h = Math.abs(ne.y - sw.y)
+          tooltip.setOpacity(w * h > 1200 ? 0.9 : 0)
+        } catch (_) {}
+      })
+    })
+  }, [map, geojsonRefs])
+
+  useEffect(() => {
+    map.on('zoomend moveend', updateLabels)
+    return () => map.off('zoomend moveend', updateLabels)
+  }, [map, updateLabels])
+
+  // Re-run when layers are toggled (delay for GeoJSON to finish rendering)
+  useEffect(() => {
+    clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(updateLabels, 400)
+    return () => clearTimeout(timerRef.current)
+  }, [visible, updateLabels])
+
+  return null
+}
+
 function FitBounds({ datasets }) {
   const map = useMap()
   useEffect(() => {
@@ -156,9 +197,10 @@ export default function WineRegionMap() {
 
       if (name) {
         leafletLayer.bindTooltip(name, {
+          permanent: true,
           direction: 'center',
           className: 'region-label',
-          sticky: true,
+          opacity: 0,
         })
       }
 
@@ -226,6 +268,7 @@ export default function WineRegionMap() {
 
         <InvalidateSize />
         <FitBounds datasets={auDatasets} />
+        <ZoomBasedLabels geojsonRefs={geojsonRefs} visible={visible} />
       </MapContainer>
 
       <div className="layer-control">
