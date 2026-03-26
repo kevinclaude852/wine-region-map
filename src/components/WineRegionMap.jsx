@@ -38,7 +38,27 @@ const COUNTRY_CONFIG = [
     label: 'EU',
     color: '#2E7D32',
     layers: [
-      { id: 'eu_regions', label: 'Regions', localPath: '/data/eu-regions.geojson', pane: 'euRegionsPane', paneZ: 420, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
+      { id: 'eu_AT', label: 'Austria',        localPath: '/data/eu-regions/EU_PDO_AT.geojson', pane: 'euPane', paneZ: 420, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
+      { id: 'eu_BE', label: 'Belgium',        localPath: '/data/eu-regions/EU_PDO_BE.geojson', pane: 'euPane', paneZ: 420, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
+      { id: 'eu_BG', label: 'Bulgaria',       localPath: '/data/eu-regions/EU_PDO_BG.geojson', pane: 'euPane', paneZ: 420, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
+      { id: 'eu_CY', label: 'Cyprus',         localPath: '/data/eu-regions/EU_PDO_CY.geojson', pane: 'euPane', paneZ: 420, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
+      { id: 'eu_CZ', label: 'Czech Republic', localPath: '/data/eu-regions/EU_PDO_CZ.geojson', pane: 'euPane', paneZ: 420, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
+      { id: 'eu_DE', label: 'Germany',        localPath: '/data/eu-regions/EU_PDO_DE.geojson', pane: 'euPane', paneZ: 420, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
+      { id: 'eu_DK', label: 'Denmark',        localPath: '/data/eu-regions/EU_PDO_DK.geojson', pane: 'euPane', paneZ: 420, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
+      { id: 'eu_ES', label: 'Spain',          localPath: '/data/eu-regions/EU_PDO_ES.geojson', pane: 'euPane', paneZ: 420, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
+      { id: 'eu_FR', label: 'France',         localPath: '/data/eu-regions/EU_PDO_FR.geojson', pane: 'euPane', paneZ: 420, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
+      { id: 'eu_GB', label: 'UK',             localPath: '/data/eu-regions/EU_PDO_GB.geojson', pane: 'euPane', paneZ: 420, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
+      { id: 'eu_GR', label: 'Greece',         localPath: '/data/eu-regions/EU_PDO_GR.geojson', pane: 'euPane', paneZ: 420, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
+      { id: 'eu_HR', label: 'Croatia',        localPath: '/data/eu-regions/EU_PDO_HR.geojson', pane: 'euPane', paneZ: 420, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
+      { id: 'eu_HU', label: 'Hungary',        localPath: '/data/eu-regions/EU_PDO_HU.geojson', pane: 'euPane', paneZ: 420, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
+      { id: 'eu_IT', label: 'Italy',          localPath: '/data/eu-regions/EU_PDO_IT.geojson', pane: 'euPane', paneZ: 420, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
+      { id: 'eu_LU', label: 'Luxembourg',     localPath: '/data/eu-regions/EU_PDO_LU.geojson', pane: 'euPane', paneZ: 420, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
+      { id: 'eu_MT', label: 'Malta',          localPath: '/data/eu-regions/EU_PDO_MT.geojson', pane: 'euPane', paneZ: 420, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
+      { id: 'eu_NL', label: 'Netherlands',    localPath: '/data/eu-regions/EU_PDO_NL.geojson', pane: 'euPane', paneZ: 420, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
+      { id: 'eu_PT', label: 'Portugal',       localPath: '/data/eu-regions/EU_PDO_PT.geojson', pane: 'euPane', paneZ: 420, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
+      { id: 'eu_RO', label: 'Romania',        localPath: '/data/eu-regions/EU_PDO_RO.geojson', pane: 'euPane', paneZ: 420, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
+      { id: 'eu_SI', label: 'Slovenia',       localPath: '/data/eu-regions/EU_PDO_SI.geojson', pane: 'euPane', paneZ: 420, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
+      { id: 'eu_SK', label: 'Slovakia',       localPath: '/data/eu-regions/EU_PDO_SK.geojson', pane: 'euPane', paneZ: 420, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
     ],
   },
 ]
@@ -62,7 +82,7 @@ async function fetchLayer(layer) {
 }
 
 function getName(props) {
-  return props?.GI_NAME || props?.name || props?.Name || props?.NAME || ''
+  return props?.GI_NAME || props?.PDOnam || props?.name || props?.Name || props?.NAME || ''
 }
 
 function InvalidateSize() {
@@ -187,7 +207,7 @@ export default function WineRegionMap() {
           maxZoom={19}
         />
 
-        {ALL_LAYERS.map(layer => (
+        {[...new Map(ALL_LAYERS.map(l => [l.pane, l])).values()].map(layer => (
           <Pane key={layer.pane} name={layer.pane} style={{ zIndex: layer.paneZ }} />
         ))}
 
