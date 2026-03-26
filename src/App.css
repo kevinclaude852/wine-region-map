@@ -211,6 +211,33 @@
   overscroll-behavior: contain;
 }
 
+.layer-control-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  background: none;
+  border: none;
+  color: #f0dde5;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+
+.toggle-icon {
+  font-size: 0.65rem;
+  color: #a06070;
+}
+
+.layer-loading {
+  font-size: 0.75rem;
+  color: #a06070;
+  margin-left: 2px;
+}
+
 .layer-group-title {
   font-size: 0.7rem;
   text-transform: uppercase;

@@ -152,33 +152,31 @@ export default function WineRegionMap() {
   const [layerData, setLayerData] = useState(
     () => Object.fromEntries(ALL_LAYERS.map(l => [l.id, null]))
   )
-  const [loading, setLoading] = useState(true)
+  const [loadingLayers, setLoadingLayers] = useState(new Set())
   const [errors, setErrors] = useState({})
   const [visible, setVisible] = useState(
-    () => Object.fromEntries(ALL_LAYERS.map(l => [l.id, true]))
+    () => Object.fromEntries(ALL_LAYERS.map(l => [l.id, false]))
   )
   const [selectedRegion, setSelectedRegion] = useState(null)
+  const [legendCollapsed, setLegendCollapsed] = useState(true)
   const geojsonRefs = useRef({})
+  const fetchedRef = useRef(new Set())
 
+  // Lazy-load: fetch a layer the first time its checkbox is ticked
   useEffect(() => {
-    async function loadAll() {
-      setLoading(true)
-      const results = await Promise.all(ALL_LAYERS.map(l => fetchLayer(l)))
-      const newData = {}
-      const newErrors = {}
-      ALL_LAYERS.forEach((layer, i) => {
-        newData[layer.id] = results[i]
-        // Only surface errors for layers that have API fallbacks (i.e. Australia)
-        if (!results[i] && layer.fallbackUrls?.length) {
-          newErrors[layer.id] = `Could not load ${layer.countryLabel} ${layer.label}`
+    ALL_LAYERS.forEach(layer => {
+      if (!visible[layer.id] || fetchedRef.current.has(layer.id)) return
+      fetchedRef.current.add(layer.id)
+      setLoadingLayers(prev => new Set([...prev, layer.id]))
+      fetchLayer(layer).then(data => {
+        setLayerData(prev => ({ ...prev, [layer.id]: data }))
+        if (!data && layer.fallbackUrls?.length) {
+          setErrors(prev => ({ ...prev, [layer.id]: `Could not load ${layer.countryLabel} ${layer.label}` }))
         }
+        setLoadingLayers(prev => { const s = new Set(prev); s.delete(layer.id); return s })
       })
-      setLayerData(newData)
-      setErrors(newErrors)
-      setLoading(false)
-    }
-    loadAll()
-  }, [])
+    })
+  }, [visible])
 
   function makeStyle(layer) {
     return () => ({
@@ -272,7 +270,14 @@ export default function WineRegionMap() {
       </MapContainer>
 
       <div className="layer-control">
-        {COUNTRY_CONFIG.map((country, i) => (
+        <button
+          className="layer-control-toggle"
+          onClick={() => setLegendCollapsed(c => !c)}
+        >
+          <span>Country / Regions</span>
+          <span className="toggle-icon">{legendCollapsed ? '▼' : '▲'}</span>
+        </button>
+        {!legendCollapsed && COUNTRY_CONFIG.map((country, i) => (
           <div key={country.id} className={`layer-group${i > 0 ? ' layer-group--separated' : ''}`}>
             <h4 className="layer-group-title">{country.label}</h4>
             {country.layers.map(layer => (
@@ -290,15 +295,16 @@ export default function WineRegionMap() {
                   }}
                 />
                 {layer.label}
+                {loadingLayers.has(layer.id) && <span className="layer-loading">…</span>}
               </label>
             ))}
           </div>
         ))}
       </div>
 
-      {loading && <LoadingOverlay />}
+      {loadingLayers.size > 0 && <LoadingOverlay />}
 
-      {errorMessages.length > 0 && !loading && (
+      {errorMessages.length > 0 && loadingLayers.size === 0 && (
         <div className="error-banner">{errorMessages.join(' · ')}</div>
       )}
 
@@ -306,7 +312,7 @@ export default function WineRegionMap() {
         <RegionSidebar region={selectedRegion} onClose={() => setSelectedRegion(null)} />
       )}
 
-      {!loading && (
+      {COUNTRY_CONFIG.some(c => c.layers.some(l => layerData[l.id])) && (
         <div className="data-badge">
           {COUNTRY_CONFIG.flatMap(country =>
             country.layers
