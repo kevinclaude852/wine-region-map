@@ -66,7 +66,8 @@ const COUNTRY_CONFIG = [
     label: 'Argentina',
     color: '#8B4513',
     layers: [
-      { id: 'ar_regions', label: 'Regions', localPath: '/data/argentina_regions.geojson', shiftLng: true, pane: 'arPane', paneZ: 430, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
+      { id: 'ar_regions',    label: 'Regions',    localPath: '/data/argentina_regions.geojson',    shiftLng: true, pane: 'arRegionsPane',    paneZ: 430, fillOpacity: 0.20, borderOpacity: 0.55, weight: 1.5 },
+      { id: 'ar_subregions', label: 'Subregions', localPath: '/data/argentina_subregions.geojson', shiftLng: true, pane: 'arSubregionsPane', paneZ: 431, fillOpacity: 0.45, borderOpacity: 0.85, weight: 1.5 },
     ],
   },
 ]
