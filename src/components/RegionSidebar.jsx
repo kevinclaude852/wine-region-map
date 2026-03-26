@@ -11,10 +11,10 @@ export default function RegionSidebar({ region, onClose }) {
 
   return (
     <div className="region-sidebar">
-      <button className="sidebar-close" onClick={onClose} aria-label="Close">
-        ×
-      </button>
-      <h2 className="sidebar-title">{name}</h2>
+      <div className="sidebar-header">
+        <h2 className="sidebar-title">{name}</h2>
+        <button className="sidebar-close" onClick={onClose} aria-label="Close">×</button>
+      </div>
       <div className="sidebar-fields">
         {fields.map(([key, val]) => (
           <div className="sidebar-field" key={key}>
