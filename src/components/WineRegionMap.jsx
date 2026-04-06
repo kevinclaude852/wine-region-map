@@ -75,8 +75,8 @@ const COUNTRY_CONFIG = [
     label: 'South Africa',
     color: '#B8860B',
     layers: [
-      { id: 'sa_districts', label: 'Districts', localPath: '/data/SA_Wine_Districts.geojson', pane: 'saDistrictsPane', paneZ: 440, fillOpacity: 0.12, borderOpacity: 0.45, weight: 1.5 },
-      { id: 'sa_regions',   label: 'Regions',   localPath: '/data/SA_Wine_Regions.geojson',   pane: 'saRegionsPane',   paneZ: 441, fillOpacity: 0.30, borderOpacity: 0.65, weight: 1.5 },
+      { id: 'sa_regions',   label: 'Regions',   localPath: '/data/SA_Wine_Regions.geojson',   pane: 'saRegionsPane',   paneZ: 440, fillOpacity: 0.10, borderOpacity: 0.35, weight: 1.5 },
+      { id: 'sa_districts', label: 'Districts', localPath: '/data/SA_Wine_Districts.geojson', pane: 'saDistrictsPane', paneZ: 441, fillOpacity: 0.30, borderOpacity: 0.60, weight: 1.5 },
       { id: 'sa_wards',     label: 'Wards',     localPath: '/data/SA_Wine_Wards.geojson',     pane: 'saWardsPane',     paneZ: 442, fillOpacity: 0.55, borderOpacity: 0.90, weight: 1.5 },
     ],
   },
