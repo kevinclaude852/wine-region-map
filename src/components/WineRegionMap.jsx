@@ -82,6 +82,23 @@ const COUNTRY_CONFIG = [
   },
 ]
 
+const BASEMAPS = [
+  {
+    id: 'street',
+    label: 'Street',
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19,
+  },
+  {
+    id: 'terrain',
+    label: 'Terrain',
+    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://opentopomap.org">OpenTopoMap</a> contributors',
+    maxZoom: 17,
+  },
+]
+
 // Flat list with color and countryLabel merged in for easy iteration
 const ALL_LAYERS = COUNTRY_CONFIG.flatMap(c =>
   c.layers.map(l => ({ ...l, color: c.color, countryLabel: c.label }))
@@ -178,6 +195,7 @@ export default function WineRegionMap() {
   )
   const [selectedRegion, setSelectedRegion] = useState(null)
   const [legendCollapsed, setLegendCollapsed] = useState(true)
+  const [basemapId, setBasemapId] = useState('street')
   const geojsonRefs = useRef({})
   const fetchedRef = useRef(new Set())
 
@@ -264,12 +282,9 @@ export default function WineRegionMap() {
         className="leaflet-map"
         zoomControl={true}
       >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          maxZoom={19}
-          noWrap={false}
-        />
+        {BASEMAPS.filter(b => b.id === basemapId).map(b => (
+          <TileLayer key={b.id} url={b.url} attribution={b.attribution} maxZoom={b.maxZoom} />
+        ))}
 
         {[...new Map(ALL_LAYERS.map(l => [l.pane, l])).values()].map(layer => (
           <Pane key={layer.pane} name={layer.pane} style={{ zIndex: layer.paneZ }} />
@@ -326,6 +341,16 @@ export default function WineRegionMap() {
               </label>
             ))}
           </div>
+        ))}
+      </div>
+
+      <div className="basemap-switcher">
+        {BASEMAPS.map(b => (
+          <button
+            key={b.id}
+            className={`basemap-btn${basemapId === b.id ? ' basemap-btn--active' : ''}`}
+            onClick={() => setBasemapId(b.id)}
+          >{b.label}</button>
         ))}
       </div>
 
