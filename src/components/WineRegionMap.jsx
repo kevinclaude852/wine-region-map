@@ -80,6 +80,15 @@ const COUNTRY_CONFIG = [
       { id: 'sa_wards',     label: 'Wards',     localPath: '/data/SA_Wine_Wards.geojson',     pane: 'saWardsPane',     paneZ: 442, fillOpacity: 0.55, borderOpacity: 0.90, weight: 1.5 },
     ],
   },
+  {
+    id: 'new_zealand',
+    label: 'New Zealand',
+    color: '#1565C0',
+    layers: [
+      { id: 'nz_regions',    label: 'Region',     localPath: '/data/nz-regions.geojson',    pane: 'nzRegionsPane',    paneZ: 450, fillOpacity: 0.15, borderOpacity: 0.45, weight: 1.5 },
+      { id: 'nz_subregions', label: 'Sub Region', localPath: '/data/nz-subregions.geojson', pane: 'nzSubregionsPane', paneZ: 451, fillOpacity: 0.45, borderOpacity: 0.85, weight: 1.5 },
+    ],
+  },
 ]
 
 const BASEMAPS = [
