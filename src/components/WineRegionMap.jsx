@@ -89,14 +89,6 @@ const COUNTRY_CONFIG = [
       { id: 'nz_subregions', label: 'Sub Region', localPath: '/data/nz-subregions.geojson', pane: 'nzSubregionsPane', paneZ: 451, fillOpacity: 0.45, borderOpacity: 0.85, weight: 1.5 },
     ],
   },
-  {
-    id: 'test',
-    label: 'Test',
-    color: '#888888',
-    layers: [
-      { id: 'test_layer', label: 'Regions', localPath: '/data/nz_wine_gi_regions_new.geojson', pane: 'testPane', paneZ: 460, fillOpacity: 0.35, borderOpacity: 0.70, weight: 1.5 },
-    ],
-  },
 ]
 
 const BASEMAPS = [
@@ -135,7 +127,7 @@ async function fetchLayer(layer) {
 }
 
 function getName(props) {
-  return props?.GI_NAME || props?.PDOnam || props?.nombre || props?.Ward || props?.District || props?.Region || props?.name || props?.Name || props?.NAME || ''
+  return props?.GI_NAME || props?.GI_Name || props?.PDOnam || props?.nombre || props?.Ward || props?.District || props?.Region || props?.name || props?.Name || props?.NAME || ''
 }
 
 function InvalidateSize() {
