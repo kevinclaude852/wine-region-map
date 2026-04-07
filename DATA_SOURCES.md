@@ -53,3 +53,30 @@ Name fields: `District`, `Region`, `Ward`
 
 **Post-processing:**
 - All three files were reprojected from ESRI:102100 (Web Mercator) to WGS84 (EPSG:4326) using pyproj
+
+---
+
+## New Zealand
+
+### Regions & Sub Regions (`public/data/nz-regions.geojson`, `nz-subregions.geojson`)
+
+**Source (polygon data):**
+```
+https://www.iponz.govt.nz/get-ip/geographical-indications/register/?location=nz&sort=updated
+```
+
+Name field: `GI_Name`
+
+**Post-processing:**
+- Split original `NZ_GI_Wine_Regions.geojson` into two files by the `type` field:
+  - `nz-regions.geojson` — features where `type == "Region"`
+  - `nz-subregions.geojson` — features where `type == "Sub Region"`
+
+---
+
+### Vineyard Statistics
+
+**Source:**
+```
+https://www.nzwine.com/media/5fzng52v/vineyard-report-2026-final.pdf
+```
