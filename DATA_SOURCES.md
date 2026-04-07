@@ -37,3 +37,19 @@ Name field: `nombre`
    - NEUQUÉN
 
 2. Merge NEUQUÉN and RÍO NEGRO into a single feature named **PATAGONIA**
+
+---
+
+## South Africa
+
+### Districts, Regions, Wards (`public/data/SA_Wine_Districts.geojson`, `SA_Wine_Regions.geojson`, `SA_Wine_Wards.geojson`)
+
+**Source:**
+```
+https://www.arcgis.com/sharing/rest/content/items/77d24f54b9424c69b9a650242d3ceb21/data?f=json
+```
+
+Name fields: `District`, `Region`, `Ward`
+
+**Post-processing:**
+- All three files were reprojected from ESRI:102100 (Web Mercator) to WGS84 (EPSG:4326) using pyproj
